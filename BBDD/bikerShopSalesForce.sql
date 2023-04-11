@@ -1,3 +1,12 @@
+/*BIKERSHOP SALES FORCE*/
+
+/*CREAR DATABASE M5-BIKERSHOP;*/
+DROP DATABASE IF EXISTS M5_BIKERSHOP;
+CREATE DATABASE M5_BIKERSHOP;
+
+/*USAR BASE DE DATOS M5-BIKERSHOP*/
+USE M5_BIKERSHOP;
+
 /*CREACION DE TABLA customers*/
 CREATE TABLE customers(
 	customer_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -14,14 +23,15 @@ CREATE TABLE customers(
 /*CREACIÓN DE TABLA ORDERS*/
 CREATE TABLE orders(
 	order_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    customer_id INT, /*FK customer*/
+    customer_id INT, /*FK customer OK*/
     order_status INT,
     order_date DATE,
     required_date DATE,
     shipped_date DATE,
-    store_id INT, /*FK stores*/
-    staff_id INT /*FK staff*/
+    store_id INT, /*FK stores OK*/
+    staff_id INT /*FK staff OK*/
 );
+
 
 /*CREACION DE TABLA staffs*/
 CREATE TABLE staffs(
@@ -31,8 +41,8 @@ CREATE TABLE staffs(
     email VARCHAR(50),
     phone VARCHAR(50),
     active BOOL,
-    store_id INT, /*FK store*/
-    manager_id INT /*? El maestro de empleados (tabla staff) almacena una relación jerárquica entre los empleados a través del campo manager_id*/
+    store_id INT, /*FK store OK*/
+    manager_id INT /*TRIGGER OK*/
 );
 
 /*CREACION DE TABLA stores*/
@@ -49,9 +59,9 @@ CREATE TABLE stores(
 
 /*CREACIÓN DE LA TABLA order_items*/
 CREATE TABLE order_items(
-	order_id INT NOT NULL, /*FK order*/
+	order_id INT NOT NULL, /*FK order OK*/
     item_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
-    product_id INT, /*FK products*/
+    product_id INT, /*FK products OK*/
     quantity INT,
     list_price INT,
     discount INT
@@ -67,8 +77,8 @@ CREATE TABLE categories(
 CREATE TABLE products(
 	product_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     product_name VARCHAR(50),
-    brand_id INT, /*FK brands*/
-    category_id INT, /*FK category*/
+    brand_id INT, /*FK brands OK*/
+    category_id INT, /*FK category OK*/
     model_year INT,
     list_price INT
 );
@@ -86,3 +96,51 @@ CREATE TABLE brands(
 	brand_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     brand_name VARCHAR(50)
 );
+
+/**/
+
+/*CREAR FOREIGN KEY TABLA orders CAMPO customer_id CON LA TABLA customer*/
+ALTER TABLE orders
+ADD CONSTRAINT ORDERS_idfk_CUSTOMERS
+FOREIGN KEY (customer_id) REFERENCES customers(customer_id);
+
+/*CREAR FOREIGN KEY TABLA orders CAMPO store_id CON LA TABLA stores*/
+ALTER TABLE orders
+ADD CONSTRAINT ORDERS_ibfk_STORES
+FOREIGN KEY (store_id) REFERENCES stores (store_id);
+
+/*CREAR FOREIGN KEY staff_id CON LA TABLA staff*/
+ALTER TABLE orders
+ADD CONSTRAINT ORDERS_idfk_STAFF
+FOREIGN KEY (staff_id) REFERENCES staffs(staff_id);
+
+/*CREAR FOREIGN KEY staff CON LA TABLA store*/
+ALTER TABLE staffs
+ADD CONSTRAINT STAFF_idfk_STORE
+FOREIGN KEY (store_id) REFERENCES stores(store_id);
+
+/*CREAR FOREIGN KEY TABLA order_items CAMPO order_id CON LA TABLA order*/
+ALTER TABLE order_items
+ADD CONSTRAINT ORDER_ITEMS_idfk_ORDERS
+FOREIGN KEY(order_id) REFERENCES orders(order_id);
+
+/*CREAR FOREIGN KEY TABLA order_items CAMPO product_id CON TABLA products*/
+ALTER TABLE order_items
+ADD CONSTRAINT ORDER_ITEMS_idfk_PRODUCTS
+FOREIGN KEY(product_id) REFERENCES products(product_id);
+
+/*CREAR FOREIGN KEY TABLA products CAMPO brand_id CON LA TABLA brands*/
+ALTER TABLE products
+ADD CONSTRAINT PRODUCTS_ibfk_BRANDS
+FOREIGN KEY(brand_id) REFERENCES brands(brand_id);
+
+/*CREAR FOREIGN KEY TABLA products CAMPO category_id CON LA TABLA categories */
+ALTER TABLE products
+ADD CONSTRAINT PRODUCTS_ibfk_CATEGORIES
+FOREIGN KEY(category_id) REFERENCES categories(category_id);
+
+/*TRIGGER ASEGURA QUE EL CAMPO manager_id SEA SIEMPRE EL MISMO QUE EL CAMPO staff_id*/
+CREATE TRIGGER set_staff_id
+BEFORE INSERT ON staffs
+FOR EACH ROW
+SET NEW.staff_id = NEW.manager_id;
