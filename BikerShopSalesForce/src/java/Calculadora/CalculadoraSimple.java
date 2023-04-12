@@ -7,7 +7,6 @@ package Calculadora;
 import java.util.List;
 
 /**
- *
  * @author Leonel Briones Palacios
  */
 public class CalculadoraSimple implements ICalculadoraBeneficios{

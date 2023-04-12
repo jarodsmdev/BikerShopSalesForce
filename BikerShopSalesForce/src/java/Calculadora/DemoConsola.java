@@ -5,7 +5,6 @@
 package Calculadora;
 
 /**
- *
  * @author Leonel Briones Palacios
  */
 public class DemoConsola {
